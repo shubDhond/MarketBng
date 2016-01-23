@@ -4,14 +4,21 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.EditText;
 
 
 public class SignUpActivity extends Activity {
+    EditText signUpEmail, signUpPassword, confirmPassword;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_up);
+
+        signUpEmail = (EditText) findViewById(R.id.signUpEmail);
+        signUpPassword = (EditText) findViewById(R.id.signUpPassword);
+        confirmPassword = (EditText) findViewById(R.id.confirmPassword);
     }
 
     @Override
@@ -34,5 +41,9 @@ public class SignUpActivity extends Activity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    public void signUp(View view){
+
     }
 }
