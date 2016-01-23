@@ -62,7 +62,7 @@ public class SignUpActivity extends Activity {
             Toast.makeText(this, "Both password field are required.", Toast.LENGTH_SHORT).show();
             return;
         } else if (!signUpPassword.getText().toString().equals(confirmPassword.getText().toString())) {
-            Toast.makeText(this, "THe passwords you entered do not match", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "The passwords you entered do not match", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -70,16 +70,22 @@ public class SignUpActivity extends Activity {
         user.setEmail(signUpEmail.getText().toString());
         user.setPassword(signUpPassword.getText().toString());
         user.setUsername(signUpEmail.getText().toString());
+        user.put("corporate", false);
 
         user.signUpInBackground(new SignUpCallback() {
             public void done(ParseException e) {
                 if (e == null) {
-                    Toast.makeText(SignUpActivity.this, "Sin Up Successful")
+                    Toast.makeText(SignUpActivity.this, "Sign Up Successful", Toast.LENGTH_SHORT).show();
                     Intent intent = new Intent(SignUpActivity.this, MainActivity.class);
                     startActivity(intent);
                 } else {
-                    // Sign up didn't succeed. Look at the ParseException
-                    // to figure out what went wrong
+                    if (e.getCode() == com.parse.ParseException.EMAIL_TAKEN || e.getCode() == com.parse.ParseException.USERNAME_TAKEN) {
+                        Toast.makeText(SignUpActivity.this, "The E-mail you entered is linked to another account", Toast.LENGTH_SHORT).show();
+                    } else if (e.getCode() == com.parse.ParseException.TIMEOUT||e.getCode() == com.parse.ParseException.CONNECTION_FAILED) {
+                        Toast.makeText(SignUpActivity.this, "Connection Failed", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(SignUpActivity.this, "Sign Up Failed", Toast.LENGTH_SHORT).show();
+                    }
                 }
             }
         });

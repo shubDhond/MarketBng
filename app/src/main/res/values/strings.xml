@@ -1,8 +1,10 @@
 <resources>
     <string name="app_name">MarketBng</string>
 
-    <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
-    <string name="title_activity_sign_in">SignInActivity</string>
-    <string name="title_activity_sign_up">SignUpActivity</string>
+    <string name="title_activity_sign_in">Sign In</string>
+    <string name="title_activity_sign_up">Sign Up</string>
+    <string name="title_activity_select_survey">SelectSurveyActivity</string>
+
+    <string name="hello_world">Hello world!</string>
 </resources>
