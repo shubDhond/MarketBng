@@ -12,6 +12,9 @@ import com.interaxon.libmuse.MuseFileWriter;
 public class DataListener extends MuseDataListener {
 
     private MuseFileWriter fileWriter;
+    double[] averages = new double[6];
+    double initialSum = 0;
+    double sampleCounter = 0;
 
     /* Empty constructor for now */
     DataListener() {}
@@ -19,13 +22,13 @@ public class DataListener extends MuseDataListener {
     @Override
     public void receiveMuseDataPacket(MuseDataPacket p) {
 
-        /* Checks when we receive packet data, adds it to the buffer and then flushes the buffer
+        /* Checks when we receive packet data0, adds it to the buffer and then flushes the buffer
          * to the file. */
         switch (p.getPacketType()) {
-            case CONCENTRATION:
-                fileWriter.addDataPacket(1, p);
-                fileWriter.addAnnotationString(1, "<-- Concentration Value");
-                fileWriter.flush();
+            case EEG:
+                // Gets beta waves, involved with active thinking / stimulation
+                initialSum += p.getValues().get(0);
+                sampleCounter++;
                 break;
             default:
                 break;
@@ -41,4 +44,23 @@ public class DataListener extends MuseDataListener {
         this.fileWriter  = fileWriter;
     }
 
+    public void setinitialSum(double sum) {
+        this.initialSum = sum;
+    }
+
+    public double getInitialSum() {
+        return this.initialSum;
+    }
+
+    public double getSampleCounter() {
+        return this.sampleCounter;
+    }
+
+    public void setSampleCounter(double count) {
+        this.sampleCounter = count;
+    }
+
+    public void setAvg(int position, double avg) {
+        this.averages[position] = avg;
+    }
 }

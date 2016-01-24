@@ -22,7 +22,7 @@ import java.util.List;
 public class SelectSurveyActivity extends Activity {
     GridView gridView;
     ImageAdapter adapter;
-    ArrayList<Survey> surveys;
+    ArrayList<ParseObject> surveys;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,10 +35,9 @@ public class SelectSurveyActivity extends Activity {
         query.findInBackground(new FindCallback<ParseObject>() {
             public void done(List<ParseObject> objects, ParseException e) {
                 if (e == null) {
-                    surveys = new ArrayList<Survey>();
+                    surveys = new ArrayList<ParseObject>();
                     for (int i = 0; i < objects.size(); i++) {
-
-                       surveys.add((Survey)objects.get(i));
+                       surveys.add(objects.get(i));
                     }
                     adapter = new ImageAdapter(SelectSurveyActivity.this, surveys);
                     gridView.setAdapter(adapter);
@@ -47,8 +46,8 @@ public class SelectSurveyActivity extends Activity {
                         @Override
                         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                             Intent intent = new Intent(SelectSurveyActivity.this, StartSurveyActivity.class);
-                            intent.putExtra("survey",surveys.get(position));
-
+                            intent.putExtra("surveyId", surveys.get(position).getObjectId());
+                            startActivity(intent);
                         }
                     });
                 } else {

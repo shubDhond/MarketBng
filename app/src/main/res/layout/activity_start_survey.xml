@@ -70,15 +70,17 @@
         android:text="Start"
         android:id="@+id/startButton"
         android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        android:onClick="onClick"/>
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Refresh"
+        android:text="Select"
         android:id="@+id/refreshButton"
         android:layout_below="@+id/configDisclaimer"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="10dp" />
+        android:layout_marginTop="10dp"
+        android:onClick="onClick"/>
 
 </RelativeLayout>

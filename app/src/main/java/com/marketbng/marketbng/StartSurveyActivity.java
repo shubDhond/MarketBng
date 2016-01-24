@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
@@ -18,6 +19,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.Toast;
 
 import com.interaxon.libmuse.AnnotationData;
 import com.interaxon.libmuse.ConnectionState;
@@ -33,6 +35,10 @@ import com.interaxon.libmuse.MuseFileWriter;
 import com.interaxon.libmuse.MuseManager;
 import com.interaxon.libmuse.MusePreset;
 import com.interaxon.libmuse.MuseVersion;
+import com.parse.FindCallback;
+import com.parse.ParseException;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
 
 public class StartSurveyActivity extends Activity implements OnItemSelectedListener, OnClickListener {
 
@@ -42,9 +48,10 @@ public class StartSurveyActivity extends Activity implements OnItemSelectedListe
     private boolean dataTransmission = true;
     private MuseFileWriter fileWriter = null;
     Button btn;
+    String surveyId;
 
     public StartSurveyActivity() {
-        DataListener dataListener = new DataListener();
+        dataListener = new DataListener();
     }
 
     @Override
@@ -59,18 +66,19 @@ public class StartSurveyActivity extends Activity implements OnItemSelectedListe
         /* Making the file and filewriter */
         File dir = getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
         fileWriter = MuseFileFactory.getMuseFileWriter(new File(dir, "new_muse_file.muse"));
-
         Log.i("Muse Headband", "libmuse version=" + LibMuseVersion.SDK_VERSION);
 
         fileWriter.addAnnotationString(1, "StartSurveyActivity onCreate");
         dataListener.setFileWriter(fileWriter);
 
+        surveyId = (String) getIntent().getCharSequenceExtra("surveyId");
     }
 
     @Override
     public void onClick(View v) {
 
         Spinner musesSpinner = (Spinner) findViewById(R.id.museSpinner);
+        musesSpinner.setOnItemSelectedListener(this);
 
         /** REFRESH BUTTON ACTION WHEN WE ARE TRYING TO FIND PAIRED MUSES
          * This should go in the start field where we select the muse to pair with.
@@ -97,37 +105,10 @@ public class StartSurveyActivity extends Activity implements OnItemSelectedListe
  
         /* WHEN WE PRESS START BUTTON HERE WE CONNECT TO A MUSE AND START LISTENING */
         else if (v.getId() == R.id.startButton) {
-
-            List<Muse> pairedMuses = MuseManager.getPairedMuses();
-            if (pairedMuses.size() < 1 ||
-                    musesSpinner.getAdapter().getCount() < 1) {
-                Log.w("Muse Headband", "There is nothing to connect to");
-            } else {
-                /* Gets the selected item in the spinner (drop down-list) and sets it as muse*/
-                muse = pairedMuses.get(musesSpinner.getSelectedItemPosition());
-                ConnectionState state = muse.getConnectionState();
-                if (state == ConnectionState.CONNECTED ||
-                        state == ConnectionState.CONNECTING) {
-                    Log.w("Muse Headband",
-                            "doesn't make sense to connect second time to the same muse");
-                    return;
-                }
-                configureLibrary();
-                fileWriter.open();
-                fileWriter.addAnnotationString(1, "Connect clicked");
-                /**
-                 * In most cases libmuse native library takes care about
-                 * exceptions and recovery mechanism, but native code still
-                 * may throw in some unexpected situations (like bad bluetooth
-                 * connection). Print all exceptions here.
-                 */
-                try {
-                    /* Here is where we do the logic to set up */
-                    muse.runAsynchronously();
-                } catch (Exception e) {
-                    Log.e("Muse Headband", e.toString());
-                }
-            }
+           Intent intent = new Intent(this, SurveyActivity.class);
+            intent.putExtra("surveyId",surveyId);
+            intent.putExtra("baseAvg", (dataListener.getInitialSum() / dataListener.getSampleCounter()));
+            startActivity(intent);
         }
     }
 
@@ -170,7 +151,7 @@ public class StartSurveyActivity extends Activity implements OnItemSelectedListe
                     @Override
                     public void run() {
                         try {
-                            Thread.sleep(30000);
+                            Thread.sleep(15000);
                         } catch (InterruptedException e) {
                             // TODO Auto-generated catch block
                             e.printStackTrace();
@@ -188,8 +169,9 @@ public class StartSurveyActivity extends Activity implements OnItemSelectedListe
                 }).start();
 
                 muse.disconnect(false);
-                fileWriter.close();
-
+                dataListener.setAvg(0, (dataListener.getInitialSum() / dataListener.getSampleCounter()));
+                dataListener.setinitialSum(0);
+                dataListener.setSampleCounter(0);
             } catch (Exception e) {
                 Log.e("Muse Headband", e.toString());
             }
@@ -228,50 +210,8 @@ public class StartSurveyActivity extends Activity implements OnItemSelectedListe
      */
     private void configureLibrary() {
         muse.registerDataListener(dataListener,
-                MuseDataPacketType.CONCENTRATION);
+                MuseDataPacketType.EEG);
         muse.setPreset(MusePreset.PRESET_14);
         muse.enableDataTransmission(dataTransmission);
-    }
-
-    private void playMuseFile(String name) {
-        File dir = getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
-        File file = new File(dir, name);
-        final String tag = "Muse File Reader";
-        if (!file.exists()) {
-            Log.w(tag, "file doesn't exist");
-            return;
-        }
-        MuseFileReader fileReader = MuseFileFactory.getMuseFileReader(file);
-        while (fileReader.gotoNextMessage()) {
-            MessageType type = fileReader.getMessageType();
-            int id = fileReader.getMessageId();
-            long timestamp = fileReader.getMessageTimestamp();
-            Log.i(tag, "type: " + type.toString() +
-                    " id: " + Integer.toString(id) +
-                    " timestamp: " + String.valueOf(timestamp));
-            switch (type) {
-                case EEG:
-                case BATTERY:
-                case ACCELEROMETER:
-                case QUANTIZATION:
-                    MuseDataPacket packet = fileReader.getDataPacket();
-                    Log.i(tag, "data packet: " + packet.getPacketType().toString());
-                    break;
-                case VERSION:
-                    MuseVersion version = fileReader.getVersion();
-                    Log.i(tag, "version" + version.getFirmwareType());
-                    break;
-                case CONFIGURATION:
-                    MuseConfiguration config = fileReader.getConfiguration();
-                    Log.i(tag, "config" + config.getBluetoothMac());
-                    break;
-                case ANNOTATION:
-                    AnnotationData annotation = fileReader.getAnnotation();
-                    Log.i(tag, "annotation" + annotation.getData());
-                    break;
-                default:
-                    break;
-            }
-        }
     }
 }

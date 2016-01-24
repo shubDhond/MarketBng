@@ -6,6 +6,6 @@
     <string name="title_activity_sign_up">Sign Up</string>
     <string name="title_activity_select_survey">SelectSurveyActivity</string>
 
-    <string name="hello_world">Hello world!</string>
-    <string name="title_activity_start_survey">StartSurveyActivity</string>
+    <string name="title_activity_start_survey">Start Survey</string>
+    <string name="title_activity_survey">Survey</string>
 </resources>

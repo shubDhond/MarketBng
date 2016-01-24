@@ -20,9 +20,9 @@ public class ImageAdapter extends ArrayAdapter {
     private Context context;
     private LayoutInflater inflater;
 
-    private ArrayList<Survey> imageUrls;
+    private ArrayList<ParseObject> imageUrls;
 
-    public ImageAdapter(Context context, ArrayList<Survey> imageUrls) {
+    public ImageAdapter(Context context, ArrayList<ParseObject> imageUrls) {
         super(context, R.layout.listview_item_image, imageUrls);
 
         this.context = context;
