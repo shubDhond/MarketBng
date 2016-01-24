@@ -7,4 +7,5 @@
     <string name="title_activity_select_survey">SelectSurveyActivity</string>
 
     <string name="hello_world">Hello world!</string>
+    <string name="title_activity_start_survey">StartSurveyActivity</string>
 </resources>
