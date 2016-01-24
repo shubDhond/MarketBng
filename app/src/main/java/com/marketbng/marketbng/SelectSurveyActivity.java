@@ -1,23 +1,61 @@
 package com.marketbng.marketbng;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.GridView;
+
+import com.parse.FindCallback;
+import com.parse.ParseException;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
+import com.parse.ParseQueryAdapter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class SelectSurveyActivity extends Activity {
+    GridView gridView;
+    ImageAdapter adapter;
+    ArrayList<Survey> surveys;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_survey);
 
-        GridView gridView = (GridView) findViewById(R.id.grid_view);
+        gridView = (GridView) findViewById(R.id.grid_view);
 
-        // Instance of ImageAdapter Class
-        gridView.setAdapter(new ImageAdapter(this));
+        ParseQuery<ParseObject> query = ParseQuery.getQuery("surveys");
+        query.findInBackground(new FindCallback<ParseObject>() {
+            public void done(List<ParseObject> objects, ParseException e) {
+                if (e == null) {
+                    surveys = new ArrayList<Survey>();
+                    for (int i = 0; i < objects.size(); i++) {
+
+                       surveys.add((Survey)objects.get(i));
+                    }
+                    adapter = new ImageAdapter(SelectSurveyActivity.this, surveys);
+                    gridView.setAdapter(adapter);
+
+                    gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                        @Override
+                        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                            Intent intent = new Intent(SelectSurveyActivity.this, StartSurveyActivity.class);
+                            intent.putExtra("survey",surveys.get(position));
+
+                        }
+                    });
+                } else {
+                    return;
+                }
+            }
+        });
     }
 
     @Override

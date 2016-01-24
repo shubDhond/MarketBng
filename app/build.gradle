@@ -24,4 +24,7 @@ dependencies {
     compile 'com.parse.bolts:bolts-android:1.+'
     compile 'com.parse:parse-android:1.+'
     compile files('libs/libmuseandroid.jar')
+    compile 'com.parse:parseui-login-android:0.0.1'
+    compile 'com.parse:parseui-widget-android:0.0.1'
+    compile 'com.squareup.picasso:picasso:2.5.2'
 }

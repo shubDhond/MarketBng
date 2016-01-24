@@ -1,49 +1,53 @@
 package com.marketbng.marketbng;
 
-/**
- * Created by sdhond on 2016-01-23.
- */
 import android.content.Context;
-import android.media.Image;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
-import android.widget.GridView;
+import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 
-public class ImageAdapter extends BaseAdapter {
-    private Context mContext;
+import com.parse.ParseObject;
+import com.squareup.picasso.Picasso;
 
-    // Keep all Images in array
-    public ArrayList<Image> images =
+import java.net.PasswordAuthentication;
+import java.util.ArrayList;
 
-    // Constructor
-    public ImageAdapter(Context c){
-        mContext = c;
-    }
+/**
+ * Created by sdhond on 2016-01-24.
+ */
+public class ImageAdapter extends ArrayAdapter {
+    private Context context;
+    private LayoutInflater inflater;
 
-    @Override
-    public int getCount() {
-        return mThumbIds.length;
-    }
+    private ArrayList<Survey> imageUrls;
 
-    @Override
-    public Object getItem(int position) {
-        return mThumbIds[position];
-    }
+    public ImageAdapter(Context context, ArrayList<Survey> imageUrls) {
+        super(context, R.layout.listview_item_image, imageUrls);
 
-    @Override
-    public long getItemId(int position) {
-        return 0;
+        this.context = context;
+        this.imageUrls = imageUrls;
+
+        inflater = LayoutInflater.from(context);
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        ImageView imageView = new ImageView(mContext);
-        imageView.setImageResource(mThumbIds[position]);
-        imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-        imageView.setLayoutParams(new GridView.LayoutParams(70, 70));
-        return imageView;
+        if (null == convertView) {
+            convertView = inflater.inflate(R.layout.listview_item_image, parent, false);
+        }
+
+        Picasso
+                .with(context)
+                .load(imageUrls.get(position).getString("logo_url"))
+                .fit() // will explain later
+                .into((ImageView) convertView);
+
+        return convertView;
     }
 
+    @Override
+    public int getCount(){
+        return imageUrls.size();
+    }
 }
